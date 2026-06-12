@@ -1,4 +1,4 @@
-use serde::{de::Error as _, Deserialize, Deserializer, Serialize, Serializer};
+use serde::{Deserialize, Deserializer, Serialize, Serializer, de::Error as _};
 use std::fmt;
 use std::ops::Deref;
 
@@ -208,10 +208,7 @@ impl TransactionInput {
             return Err(BitcoinError::InsufficientBytes);
         }
         let sequence = u32::from_le_bytes(bytes[offset..offset + 4].try_into().unwrap());
-        Ok((
-            Self::new(previous_output, script_sig, sequence),
-            offset + 4,
-        ))
+        Ok((Self::new(previous_output, script_sig, sequence), offset + 4))
     }
 }
 
@@ -260,10 +257,7 @@ impl BitcoinTransaction {
             return Err(BitcoinError::InsufficientBytes);
         }
         let lock_time = u32::from_le_bytes(bytes[offset..offset + 4].try_into().unwrap());
-        Ok((
-            Self::new(version, inputs, lock_time),
-            offset + 4,
-        ))
+        Ok((Self::new(version, inputs, lock_time), offset + 4))
     }
 }
 
@@ -273,8 +267,16 @@ impl fmt::Display for BitcoinTransaction {
         writeln!(f, "Inputs: {}", self.inputs.len())?;
         for (index, input) in self.inputs.iter().enumerate() {
             writeln!(f, "  Input {}:", index)?;
-            writeln!(f, "    Previous Output TXID: {}", hex::encode(input.previous_output.txid.0))?;
-            writeln!(f, "    Previous Output Vout: {}", input.previous_output.vout)?;
+            writeln!(
+                f,
+                "    Previous Output TXID: {}",
+                hex::encode(input.previous_output.txid.0)
+            )?;
+            writeln!(
+                f,
+                "    Previous Output Vout: {}",
+                input.previous_output.vout
+            )?;
             writeln!(f, "    ScriptSig Length: {}", input.script_sig.bytes.len())?;
             writeln!(f, "    ScriptSig: {}", hex::encode(&input.script_sig.bytes))?;
             writeln!(f, "    Sequence: {}", input.sequence)?;
